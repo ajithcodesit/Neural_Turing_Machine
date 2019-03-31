@@ -1,0 +1,4 @@
+#Directories to be ignored
+/.idea/
+/notebooks/
+/__pycache__/

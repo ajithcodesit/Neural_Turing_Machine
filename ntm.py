@@ -72,14 +72,13 @@ class NTM(Model):
             controller_inputs = tf.concat([inputs[i], self.r_t_1], axis=1)
             controller_outputs = self.controller(controller_inputs)  # [Batch size, Controller size]
 
+            r_t, w_t = self.read_head(controller_outputs, tf.identity(self.w_t_1), tf.identity(self.M_t))  # [Batch size, M], [Batch size, N]
+            self.r_t_1.assign(r_t)
+            self.w_t_1.assign(w_t)
+
             # [Batch size, M, N], [Batch size, M], [Batch size, M], [Batch size, N]
             M_t, self.e_t, self.a_t, w_t = self.write_head(controller_outputs, tf.identity(self.w_t_1), tf.identity(self.M_t))
             self.M_t.assign(M_t)
-            self.w_t_1.assign(w_t)
-
-            # [Batch size, M], [Batch size, N]
-            r_t, w_t = self.read_head(controller_outputs, tf.identity(self.w_t_1), tf.identity(self.M_t))
-            self.r_t_1.assign(r_t)
             self.w_t_1.assign(w_t)
 
             fc_input = tf.concat([controller_outputs, self.r_t_1], axis=1)  # [Batch size, Controller size + M],

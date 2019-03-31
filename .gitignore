@@ -2,3 +2,4 @@
 /.idea/
 /notebooks/
 /__pycache__/
+/tensorflow_ckpt/

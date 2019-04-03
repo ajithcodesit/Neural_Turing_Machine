@@ -26,7 +26,7 @@ class Addressing(Model):
         else:
             self.emit_len = np.sum(self.write_split)
 
-        self.fc_addr = Dense(units=self.emit_len, activation='sigmoid', name="emit_params", trainable=False,
+        self.fc_addr = Dense(units=self.emit_len, activation=tf.nn.tanh, name="emit_params",
                              kernel_initializer='glorot_uniform', bias_initializer='glorot_normal')
         
         self.k_t = None
@@ -50,23 +50,23 @@ class Addressing(Model):
         if self.reading:
             k_t, beta_t, g_t, s_t, gamma_t = tf.split(fc_output, self.read_split, axis=-1)
 
-            self.k_t = tf.identity(k_t)
+            self.k_t = k_t
             self.beta_t = tf.nn.softplus(beta_t)
             self.g_t = tf.nn.sigmoid(g_t)
-            self.s_t = tf.nn.softmax(s_t, axis=1)
+            self.s_t = tf.nn.softmax(s_t, axis=-1)
             self.gamma_t = 1.0 + tf.nn.softplus(gamma_t)
 
         else:
             k_t, beta_t, g_t, s_t, gamma_t, e_t, a_t = tf.split(fc_output, self.write_split, axis=-1)
 
-            self.k_t = tf.identity(k_t)
+            self.k_t = k_t
             self.beta_t = tf.nn.softplus(beta_t)
             self.g_t = tf.nn.sigmoid(g_t)
-            self.s_t = tf.nn.softmax(s_t, axis=1)
+            self.s_t = tf.nn.softmax(s_t, axis=-1)
             self.gamma_t = 1.0 + tf.nn.softplus(gamma_t)
 
             self.e_t = tf.nn.sigmoid(e_t)
-            self.a_t = tf.identity(a_t)
+            self.a_t = a_t
 
     @staticmethod
     def cosine_similarity(k, m):
@@ -88,7 +88,7 @@ class Addressing(Model):
     
     def content_addressing(self, M_t):
         k_t = tf.expand_dims(self.k_t, axis=1)
-        self.w_c_t = tf.nn.softmax(self.beta_t * self.cosine_similarity(k_t, M_t), axis=1)
+        self.w_c_t = tf.nn.softmax(self.beta_t * self.cosine_similarity(k_t, M_t), axis=-1)
     
     def interpolation(self, w_t_prev):
         self.w_g_t = (self.g_t * self.w_c_t) + ((1 - self.g_t)*w_t_prev)
@@ -103,7 +103,9 @@ class Addressing(Model):
         self.w_tidle_t = convolved_weights.stack()
 
     def sharpening(self):
-        self.w_t = tf.nn.softmax(tf.pow(self.w_tidle_t, self.gamma_t), axis=1)
+        # self.w_t = tf.nn.softmax(tf.pow(self.w_tidle_t, self.gamma_t), axis=-1)
+        w_raised = tf.pow(self.w_tidle_t, self.gamma_t)
+        self.w_t = tf.divide(w_raised, tf.reduce_sum(w_raised, axis=-1, keepdims=True))
 
     def call(self, controller_output, w_t_prev, M_t):
         # Controller outputs used for addressing

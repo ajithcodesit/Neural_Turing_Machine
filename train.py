@@ -39,7 +39,7 @@ train_accuracy = tf.metrics.BinaryAccuracy(name="train_accuracy")
 
 # Checkpoints
 ckpt = tf.train.Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=ntm_model)
-manager = tf.train.CheckpointManager(ckpt, './tensorflow_ckpt', max_to_keep=3)
+manager = tf.train.CheckpointManager(ckpt, './ntm_ckpt', max_to_keep=3)
 ckpt.restore(manager.latest_checkpoint)
 
 if manager.latest_checkpoint:
@@ -50,7 +50,7 @@ else:
 
 def train_one_step(x, y):
     with tf.GradientTape() as tape:
-        y_pred = ntm_model(x)
+        y_pred = ntm_model(x, training=True)
         loss = bce_loss(y, y_pred)
 
     gradients = tape.gradient(loss, ntm_model.trainable_variables)
@@ -89,8 +89,14 @@ except KeyboardInterrupt:
 # Visualize the prediction made by the model
 x, y = generate_patterns(batch_size, max_sequence, min_sequence, in_bits, out_bits, fixed_seq_len=False)
 y_pred = ntm_model(x)
+rt, r_wt, at, w_wt, Mt = ntm_model.debug_ntm()
+
+plt.matshow(rt)
+plt.matshow(at)
+plt.matshow(w_wt)
+plt.matshow(r_wt)
+plt.matshow(Mt)
 
 plt.matshow(x[0])
-plt.matshow(y[0])
 plt.matshow(y_pred[0])
 plt.show()

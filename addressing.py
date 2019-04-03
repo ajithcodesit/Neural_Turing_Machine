@@ -103,7 +103,6 @@ class Addressing(Model):
         self.w_tidle_t = convolved_weights.stack()
 
     def sharpening(self):
-        # self.w_t = tf.nn.softmax(tf.pow(self.w_tidle_t, self.gamma_t), axis=-1)
         w_raised = tf.pow(self.w_tidle_t, self.gamma_t)
         self.w_t = tf.divide(w_raised, tf.reduce_sum(w_raised, axis=-1, keepdims=True))
 

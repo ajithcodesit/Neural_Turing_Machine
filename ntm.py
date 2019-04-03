@@ -11,7 +11,8 @@ from tensorflow.keras.layers import Dense
 
 class NTM(Model):
 
-    def __init__(self, controller_size=100, memory_locations=128, memory_vector_size=20, maximum_shifts=3, output_size=8):
+    def __init__(self, controller_size=100, memory_locations=128, memory_vector_size=20, maximum_shifts=3,
+                 output_size=8, learn_r_bias=False, learn_w_bias=False, learn_m_bias=False):
         super(NTM, self).__init__()
 
         self.memory_locations = memory_locations  # N locations
@@ -25,10 +26,10 @@ class NTM(Model):
         self.final_fc = Dense(units=output_size, activation=tf.nn.sigmoid, name="final_fc",
                               kernel_initializer='glorot_uniform', bias_initializer='glorot_normal')
 
-        # The learned bias vector
-        self.r_bias = tf.constant(tf.random.normal([1, self.memory_vector_size]))  # Bias for previous reads
-        self.w_bias = tf.constant(tf.nn.softmax(tf.random.normal([1, self.memory_locations])))
-        self.M_bias = tf.constant(tf.ones([1, self.memory_locations, self.memory_vector_size]) * 1e-6)
+        # The bias vector
+        self.r_bias = tf.Variable(tf.random.normal([1, self.memory_vector_size]), trainable=learn_r_bias)
+        self.w_bias = tf.Variable(tf.nn.softmax(tf.random.normal([1, self.memory_locations])), trainable=learn_w_bias)
+        self.M_bias = tf.Variable(tf.ones([1, self.memory_locations, self.memory_vector_size]) * 1e-6, trainable=learn_m_bias)
 
         # States of the NTM
         self.r_t_1 = None  # Previous read vector variable [Batch size, M]

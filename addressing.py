@@ -45,28 +45,24 @@ class Addressing(Model):
         self.w_tidle_t = None
         self.w_t = None
 
+    def emit_addressing_params(self, k_t, beta_t, g_t, s_t, gamma_t):
+        self.k_t = k_t  # Key vector
+        self.beta_t = tf.nn.softplus(beta_t)  # Key strength
+        self.g_t = tf.nn.sigmoid(g_t)  # Interpolation gate
+        self.s_t = tf.nn.softmax(s_t, axis=-1)  # Shift weighting
+        self.gamma_t = 1.0 + tf.nn.softplus(gamma_t)  # Sharpen
+
     def emit_head_params(self, fc_output):
 
         if self.reading:
             k_t, beta_t, g_t, s_t, gamma_t = tf.split(fc_output, self.read_split, axis=-1)
-
-            self.k_t = k_t
-            self.beta_t = tf.nn.softplus(beta_t)
-            self.g_t = tf.nn.sigmoid(g_t)
-            self.s_t = tf.nn.softmax(s_t, axis=-1)
-            self.gamma_t = 1.0 + tf.nn.softplus(gamma_t)
+            self.emit_addressing_params(k_t, beta_t, g_t, s_t, gamma_t)
 
         else:
             k_t, beta_t, g_t, s_t, gamma_t, e_t, a_t = tf.split(fc_output, self.write_split, axis=-1)
-
-            self.k_t = k_t
-            self.beta_t = tf.nn.softplus(beta_t)
-            self.g_t = tf.nn.sigmoid(g_t)
-            self.s_t = tf.nn.softmax(s_t, axis=-1)
-            self.gamma_t = 1.0 + tf.nn.softplus(gamma_t)
-
-            self.e_t = tf.nn.sigmoid(e_t)
-            self.a_t = a_t
+            self.emit_addressing_params(k_t, beta_t, g_t, s_t, gamma_t)
+            self.e_t = tf.nn.sigmoid(e_t)  # Erase vector
+            self.a_t = a_t  # Add vector
 
     @staticmethod
     def cosine_similarity(k, m):

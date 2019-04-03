@@ -40,7 +40,7 @@ class NTM(Model):
         self.e_t = None
         self.a_t = None
 
-    def create_new_state(self, batch_size):  # Creates a new NTM state
+    def reset_ntm_state(self, batch_size):  # Creates a new NTM state
         # This has to be manually called if stateful is set to true
         self.r_t_1 = tf.tile(self.r_bias, [batch_size, 1])
         self.w_t_1 = tf.tile(self.w_bias, [batch_size, 1])
@@ -52,7 +52,7 @@ class NTM(Model):
         outputs = tf.TensorArray(dtype=inputs.dtype, size=inputs.shape[0])
         
         if not stateful:  # A new state will not be created at the start of each new batch
-            self.create_new_state(inputs.shape[1])
+            self.reset_ntm_state(inputs.shape[1])
 
         for i in range(inputs.shape[0]):
             # Concatenated input and previous reads [Batch, Features + N]

@@ -12,11 +12,11 @@ class Controller(Model):
         super(Controller, self).__init__()
 
         # 3-layer feedforward controller
-        self.d1 = Dense(units=controller_size, activation=tf.nn.sigmoid, name="controller_d1",
+        self.d1 = Dense(units=controller_size, activation=tf.nn.tanh, name="controller_d1",
                         kernel_initializer='glorot_uniform', bias_initializer='glorot_normal')
-        self.d2 = Dense(units=controller_size, activation=tf.nn.sigmoid, name="controller_d2",
+        self.d2 = Dense(units=controller_size, activation=tf.nn.tanh, name="controller_d2",
                         kernel_initializer='glorot_uniform', bias_initializer='glorot_normal')
-        self.d3 = Dense(units=controller_size, activation=tf.nn.sigmoid, name="controller_d3",
+        self.d3 = Dense(units=controller_size, activation=tf.nn.tanh, name="controller_d3",
                         kernel_initializer='glorot_uniform', bias_initializer='glorot_normal')
 
     def call(self, controller_input):

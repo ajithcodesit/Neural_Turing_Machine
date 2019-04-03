@@ -48,6 +48,11 @@ class NTM(Model):
 
     def debug_ntm(self):  # Function to debug the NTM working
         # The reads, adds and their weights of the first sample in a batch is saved for debug
+        self.reads.reverse()
+        self.adds.reverse()
+        self.read_weights.reverse()
+        self.write_weights.reverse()
+
         rt = tf.stack(self.reads)
         at = tf.stack(self.adds)
         r_wt = tf.stack(self.read_weights)

@@ -62,34 +62,35 @@ def train_one_step(x, y):
 
 
 # Training loop
-try:
-    for e in range(epoch):
-        for step in range(steps_per_epoch):
-            x, y = generate_patterns(batch_size, max_sequence, min_sequence, in_bits, out_bits,
-                                     pad=K.epsilon(), low_tol=K.epsilon())
-
-            train_one_step(x, y)
-
-            template = "Epoch: {}, Train step: {}, Train loss: {}, Train accuracy: {}"
-            print(template.format(
-                                e+1,
-                                step+1,
-                                train_loss.result(),
-                                train_accuracy.result()*100.0
-                                ))
-
-            ckpt.step.assign_add(1)
-            if int(ckpt.step) % 10 == 0:
-                save_path = manager.save()
-                print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
-
-except KeyboardInterrupt:
-    print("User interrupted")
+# try:
+#     for e in range(epoch):
+#         for step in range(steps_per_epoch):
+#             x, y = generate_patterns(batch_size, max_sequence, min_sequence, in_bits, out_bits,
+#                                      pad=K.epsilon(), low_tol=K.epsilon())
+#
+#             train_one_step(x, y)
+#
+#             template = "Epoch: {}, Train step: {}, Train loss: {}, Train accuracy: {}"
+#             print(template.format(
+#                                 e+1,
+#                                 step+1,
+#                                 train_loss.result(),
+#                                 train_accuracy.result()*100.0
+#                                 ))
+#
+#             ckpt.step.assign_add(1)
+#             if int(ckpt.step) % 10 == 0:
+#                 save_path = manager.save()
+#                 print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
+#
+# except KeyboardInterrupt:
+#     print("User interrupted")
 
 # Visualize the prediction made by the model
 x, y = generate_patterns(batch_size, max_sequence, min_sequence, in_bits, out_bits, fixed_seq_len=False)
 y_pred = ntm_model(x)
 
+plt.matshow(x[0])
 plt.matshow(y[0])
 plt.matshow(y_pred[0])
 plt.show()

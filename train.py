@@ -11,7 +11,7 @@ from seqgen import generate_patterns
 # Train parameters
 epoch = 100
 batch_size = 1
-steps_per_epoch = 100
+steps_per_epoch = 100*100
 learning_rate = 1e-4
 
 # NTM parameters
@@ -21,7 +21,7 @@ memory_vector_size = 20
 maximum_shifts = 3
 
 # Copy task sequence generator parameters
-max_sequence = 20
+max_sequence = 5
 min_sequence = 1
 in_bits = 8
 out_bits = 8
@@ -75,7 +75,7 @@ try:
                                 e+1,
                                 step+1,
                                 train_loss.result(),
-                                train_accuracy.result()*100
+                                train_accuracy.result()*100.0
                                 ))
 
             ckpt.step.assign_add(1)

@@ -40,19 +40,42 @@ class NTM(Model):
         self.e_t = None
         self.a_t = None
 
+        # For visualizing the NTM working (Must be used only during predictions)
+        self.reads = []
+        self.adds = []
+        self.read_weights = []
+        self.write_weights = []
+
+    def debug_ntm(self):  # Function to debug the NTM working
+        # The reads, adds and their weights of the first sample in a batch is saved for debug
+        rt = tf.stack(self.reads)
+        at = tf.stack(self.adds)
+        r_wt = tf.stack(self.read_weights)
+        w_wt = tf.stack(self.write_weights)
+        Mt = self.M_t[0]
+
+        return rt.numpy(), r_wt.numpy(), at.numpy(), w_wt.numpy(), Mt.numpy()
+
+    def reset_debug_vars(self):  # This is called if the NTM is not stateful
+        self.reads = []
+        self.adds = []
+        self.read_weights = []
+        self.write_weights = []
+
     def reset_ntm_state(self, batch_size):  # Creates a new NTM state
         # This has to be manually called if stateful is set to true
         self.r_t_1 = tf.tile(self.r_bias, [batch_size, 1])
         self.w_t_1 = tf.tile(self.w_bias, [batch_size, 1])
         self.M_t = tf.tile(self.M_bias, [batch_size, 1, 1])
 
-    def call(self, inputs, stateful=False):
+    def call(self, inputs, stateful=False, training=False):
         # Convert from [Batch, Timesteps, Features] to [Timesteps, Batch, Features]
         inputs = tf.transpose(inputs, [1, 0, 2])
         outputs = tf.TensorArray(dtype=inputs.dtype, size=inputs.shape[0])
         
         if not stateful:  # A new state will not be created at the start of each new batch
             self.reset_ntm_state(inputs.shape[1])
+            self.reset_debug_vars()
 
         for i in range(inputs.shape[0]):
             # Concatenated input and previous reads [Batch, Features + N]
@@ -61,9 +84,15 @@ class NTM(Model):
 
             # [Batch size, M, N], [Batch size, M], [Batch size, M], [Batch size, N]
             self.M_t, self.e_t, self.a_t, self.w_t_1 = self.write_head(controller_outputs, self.w_t_1, self.M_t)
+            if not training:
+                self.adds.append(self.a_t[0])
+                self.write_weights.append(self.w_t_1[0])
 
             # [Batch size, M], [Batch size, N]
             self.r_t_1, self.w_t_1 = self.read_head(controller_outputs, self.w_t_1, self.M_t)
+            if not training:
+                self.reads.append(self.r_t_1[0])
+                self.read_weights.append(self.w_t_1[0])
 
             fc_input = tf.concat([controller_outputs, self.r_t_1], axis=1)  # [Batch size, Controller size + M],
             output_t = self.final_fc(fc_input)  # [Batch size, Output size]

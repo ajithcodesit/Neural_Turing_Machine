@@ -26,8 +26,8 @@ class NTM(Model):
         self.final_fc = Dense(units=output_size, activation=tf.nn.sigmoid, name="final_fc",
                               kernel_initializer='glorot_uniform', bias_initializer='glorot_normal')
 
-        # The bias vector
-        self.r_bias = tf.Variable(tf.random.normal([1, self.memory_vector_size]), trainable=learn_r_bias)
+        # The bias vector (These bias vectors can be learned or initialized to the same value)
+        self.r_bias = tf.Variable(tf.random.truncated_normal([1, self.memory_vector_size], mean=0.0, stddev=0.5), trainable=learn_r_bias)
         self.w_bias = tf.Variable(tf.nn.softmax(tf.random.normal([1, self.memory_locations])), trainable=learn_w_bias)
         self.M_bias = tf.Variable(tf.ones([1, self.memory_locations, self.memory_vector_size]) * 1e-6, trainable=learn_m_bias)
 

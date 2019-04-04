@@ -2,4 +2,4 @@
 /.idea/
 /notebooks/
 /__pycache__/
-/ntm_ckpt/
+/tf_ntm_ckpt/

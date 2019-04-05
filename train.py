@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import datetime
 import tensorflow as tf
 import matplotlib.pyplot as plt 
 
@@ -11,7 +12,7 @@ from seqgen import generate_patterns
 # Train parameters
 epochs = 100
 batch_size = 5
-steps_per_epoch = 10000
+steps_per_epoch = 2000
 learning_rate = 1e-4
 momentum = 0.9
 clip_grad_min = -10.0
@@ -42,6 +43,12 @@ train_cost = tf.metrics.Mean(name="train_cost")
 ckpt = tf.train.Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=ntm_model)
 manager = tf.train.CheckpointManager(ckpt, './tf_ntm_ckpt', max_to_keep=3)
 ckpt.restore(manager.latest_checkpoint)
+
+# Tensorboard
+# tensorboard --logdir tf_ntm_logs/gradient_tape
+current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+train_log_dir = './tf_ntm_logs/gradient_tape/' + current_time + '/train'
+train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
 if manager.latest_checkpoint:
     print("Restoring NTM model from {}".format(manager.latest_checkpoint))
@@ -85,6 +92,10 @@ try:
                                 train_loss.result(),
                                 train_cost.result()
                                 ))
+
+            with train_summary_writer.as_default():
+                tf.summary.scalar("loss", train_loss.result(), step=((epoch+1)*(step+1)*batch_size))
+                tf.summary.scalar("cost_per_sequence", train_cost.result(), step=((epoch+1)*(step+1)*batch_size))
 
             ckpt.step.assign_add(1)
             if int(ckpt.step) % 10 == 0:

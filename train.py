@@ -11,7 +11,7 @@ from seqgen import generate_patterns
 
 # Train parameters
 epochs = 100
-batch_size = 5
+batch_size = 1
 steps_per_epoch = 2000
 learning_rate = 1e-4
 momentum = 0.9
@@ -25,7 +25,7 @@ memory_vector_size = 20
 maximum_shifts = 3
 
 # Copy task sequence generator parameters
-max_sequence = 5
+max_sequence = 20
 min_sequence = 1
 in_bits = 8
 out_bits = 8
@@ -90,7 +90,7 @@ try:
                 save_path = manager.save()
                 print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
 
-            template = "Epoch: {}, Train step: {}, Train loss: {}, Train accuracy: {}"
+            template = "Epoch: {}, Train step: {}, Train loss: {}, Train cost: {}"
             print(template.format(
                 epoch + 1,
                 step + 1,

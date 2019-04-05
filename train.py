@@ -94,6 +94,7 @@ try:
                                 ))
 
             with train_summary_writer.as_default():
+                # The loss and cost per sequence against the number of sequences shown to the model
                 tf.summary.scalar("loss", train_loss.result(), step=((epoch+1)*(step+1)*batch_size))
                 tf.summary.scalar("cost_per_sequence", train_cost.result(), step=((epoch+1)*(step+1)*batch_size))
 

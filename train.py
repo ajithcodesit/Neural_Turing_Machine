@@ -85,23 +85,22 @@ try:
 
             train_one_step(x, y)
 
-            template = "Epoch: {}, Train step: {}, Train loss: {}, Train accuracy: {}"
-            print(template.format(
-                                epoch+1,
-                                step+1,
-                                train_loss.result(),
-                                train_cost.result()
-                                ))
-
-            with train_summary_writer.as_default():
-                # The loss and cost per sequence against the number of sequences shown to the model
-                tf.summary.scalar("loss", train_loss.result(), step=((epoch+1)*(step+1)*batch_size))
-                tf.summary.scalar("cost_per_sequence", train_cost.result(), step=((epoch+1)*(step+1)*batch_size))
-
             ckpt.step.assign_add(1)
             if int(ckpt.step) % 10 == 0:
                 save_path = manager.save()
                 print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
+
+            template = "Epoch: {}, Train step: {}, Train loss: {}, Train accuracy: {}"
+            print(template.format(
+                epoch + 1,
+                step + 1,
+                train_loss.result(),
+                train_cost.result()))
+
+            with train_summary_writer.as_default():
+                # The loss and cost per sequence against the number of sequences shown to the model
+                tf.summary.scalar("loss", train_loss.result(), step=(int(ckpt.step)*batch_size))
+                tf.summary.scalar("cost_per_sequence", train_cost.result(), step=(int(ckpt.step)*batch_size))
 
         train_loss.reset_states()
         train_cost.reset_states()

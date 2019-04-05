@@ -11,12 +11,23 @@ from seqgen import generate_patterns
 
 # Train parameters
 epochs = 100
-batch_size = 1
+batch_size = 2
 steps_per_epoch = 2000
 learning_rate = 1e-4
 momentum = 0.9
 clip_grad_min = -10.0
 clip_grad_max = 10.0
+
+"""
+For training sequences of length 5
+epochs = 7 to 8
+batch_size = 2
+steps_per_epoch = 2000
+learning_rate = 1e-4
+momentum = 0.9
+clip_grad_min = -10.0
+clip_grad_max = 10.0
+"""
 
 # NTM parameters
 controller_size = 100
@@ -25,7 +36,7 @@ memory_vector_size = 20
 maximum_shifts = 3
 
 # Copy task sequence generator parameters
-max_sequence = 20
+max_sequence = 5
 min_sequence = 1
 in_bits = 8
 out_bits = 8
@@ -109,7 +120,7 @@ except KeyboardInterrupt:
     print("User interrupted")
 
 # Visualize the prediction made by the model
-x, y = generate_patterns(batch_size, max_sequence, min_sequence, in_bits, out_bits, fixed_seq_len=True)
+x, y = generate_patterns(1, 10, 1, in_bits, out_bits, fixed_seq_len=True)
 y_pred = ntm_model(x)
 rt, r_wt, at, w_wt, Mt = ntm_model.debug_ntm()
 

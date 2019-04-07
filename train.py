@@ -114,7 +114,7 @@ def train_one_step(x, y):
 
 
 # Training loop
-if arg.train is True:
+if arg.train:
     print("Training NTM")
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
@@ -151,7 +151,7 @@ if arg.train is True:
         print("User interrupted")
 
 # Visualize the prediction made by the model
-if arg.test is True:
+if arg.test or arg.visualize:
     x, y = generate_patterns(arg.batch_size, arg.max_sequence, arg.min_sequence,
                              arg.in_bits, arg.out_bits, fixed_seq_len=arg.fixed_seq_len)
 
@@ -161,7 +161,7 @@ if arg.test is True:
     cmap_jet = plt.get_cmap('jet')
     cmap_gray = plt.get_cmap('gray')
 
-    if arg.visualize is True:
+    if arg.visualize:
         fig_ntm, (ax_at, ax_wwt, ax_mt, ax_rwt, ax_rt) = plt.subplots(5, 1)
         fig_ntm.subplots_adjust(top=0.85, bottom=0.15, left=0.05, right=0.95, hspace=0.3)
 
@@ -177,14 +177,15 @@ if arg.test is True:
         ax_rwt.matshow(r_wt, aspect='auto', cmap=cmap_gray)
         ax_rt.matshow(np.transpose(rt), aspect='equal', cmap=cmap_jet)
 
-    fig_ntm_out, (ax_t, ax_p) = plt.subplots(2, 1)
-    fig_ntm_out.subplots_adjust(top=0.85, bottom=0.15, left=0.05, right=0.95, hspace=0.3)
-    t = ax_t.matshow(np.transpose(x[0]), aspect='auto', cmap=cmap_jet)
-    ax_t.set_ylabel("Target")
-    p = ax_p.matshow(np.transpose(y_pred[0]), aspect='auto', cmap=cmap_jet)
-    ax_p.set_ylabel("Prediction")
+    if arg.test:
+        fig_ntm_out, (ax_t, ax_p) = plt.subplots(2, 1)
+        fig_ntm_out.subplots_adjust(top=0.85, bottom=0.15, left=0.05, right=0.95, hspace=0.3)
+        t = ax_t.matshow(np.transpose(x[0]), aspect='auto', cmap=cmap_jet)
+        ax_t.set_ylabel("Target")
+        p = ax_p.matshow(np.transpose(y_pred[0]), aspect='auto', cmap=cmap_jet)
+        ax_p.set_ylabel("Prediction")
 
-    fig_ntm_out.suptitle('NTM Copy Task (Sequence Length {})'.format(arg.max_sequence))
-    fig_ntm_out.colorbar(t, ax=(ax_t, ax_p), orientation="vertical", fraction=0.1)
+        fig_ntm_out.suptitle('NTM Copy Task (Sequence Length {})'.format(arg.max_sequence))
+        fig_ntm_out.colorbar(t, ax=(ax_t, ax_p), orientation="vertical", fraction=0.1)
 
     plt.show()

@@ -71,23 +71,19 @@ ntm_model = NTM(arg.controller_size, arg.memory_locations, arg.memory_vector_siz
 optimizer = tf.optimizers.RMSprop(learning_rate=arg.learning_rate, momentum=arg.momentum)
 bce_loss = tf.losses.BinaryCrossentropy()
 
-# Stateful metrics
+# Training metrics
 train_loss = tf.metrics.Mean(name="train_loss")
 train_cost = tf.metrics.Mean(name="train_cost")
-
-# Checkpoints
-ckpt = tf.train.Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=ntm_model)
-manager = tf.train.CheckpointManager(ckpt, arg.checkpoint_dir, arg.max_to_keep)
-ckpt.restore(manager.latest_checkpoint)
 
 # Tensorboard
 # tensorboard --logdir tf_ntm_logs/gradient_tape
 current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 train_log_dir = arg.train_log_dir + current_time + '/train'
-train_summary_writer = None  # Only used in training
-if arg.train:
-    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
+# Checkpoints
+ckpt = tf.train.Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=ntm_model)
+manager = tf.train.CheckpointManager(ckpt, arg.checkpoint_dir, arg.max_to_keep)
+ckpt.restore(manager.latest_checkpoint)
 if manager.latest_checkpoint:
     print("Restoring NTM model from {}".format(manager.latest_checkpoint))
 else:
@@ -117,6 +113,8 @@ def train_one_step(x, y):
 # Training loop
 if arg.train is True:
     print("Training NTM")
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+
     try:
         for epoch in range(arg.epochs):
             for step in range(arg.steps_per_epoch):
@@ -150,7 +148,7 @@ if arg.train is True:
         print("User interrupted")
 
 # Visualize the prediction made by the model
-if arg.visualize:
+if arg.visualize is True:
     x, y = generate_patterns(arg.batch_size, arg.max_sequence, arg.min_sequence,
                              arg.in_bits, arg.out_bits, fixed_seq_len=arg.fixed_seq_len)
 

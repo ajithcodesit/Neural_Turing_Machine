@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description="Neural Turing Machine")
 parser.add_argument('--train', action="store_true", default=False,
                     help="Train the NTM")
 parser.add_argument('--visualize', action="store_true", default=False,
-                    help="Visualize the working of the NTM")
+                    help="Visualize the working of the NTM on the copy task")
 parser.add_argument('--fixed_seq_len', action="store_true", default=True,
                     help="Whether a fixed or random sequence length should be used when visualizing")
 parser.add_argument('--epochs', action="store", dest="epochs", default=100, type=int,
@@ -66,17 +66,6 @@ parser.add_argument('--train_log_dir', action="store", dest="train_log_dir", def
 
 arg = parser.parse_args()
 
-"""
-For training sequences of length 5
-epochs = 7 to 8
-batch_size = 2
-steps_per_epoch = 2000
-learning_rate = 1e-4
-momentum = 0.9
-clip_grad_min = -10.0
-clip_grad_max = 10.0
-"""
-
 # Training
 ntm_model = NTM(arg.controller_size, arg.memory_locations, arg.memory_vector_size, arg.maximum_shifts, arg.out_bits)
 optimizer = tf.optimizers.RMSprop(learning_rate=arg.learning_rate, momentum=arg.momentum)
@@ -95,7 +84,7 @@ ckpt.restore(manager.latest_checkpoint)
 # tensorboard --logdir tf_ntm_logs/gradient_tape
 current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 train_log_dir = arg.train_log_dir + current_time + '/train'
-train_summary_writer = None # Only used in training
+train_summary_writer = None  # Only used in training
 if arg.train:
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 

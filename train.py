@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt 
 
@@ -15,6 +16,8 @@ parser = argparse.ArgumentParser(description="Neural Turing Machine")
 # Train parameters
 parser.add_argument('--train', action="store_true", default=False,
                     help="Train the NTM")
+parser.add_argument('--test', action="store_true", default=False,
+                    help="Test the NTM with a copy task input sequence")
 parser.add_argument('--visualize', action="store_true", default=False,
                     help="Visualize the working of the NTM on the copy task")
 parser.add_argument('--fixed_seq_len', action="store_true", default=True,
@@ -148,19 +151,40 @@ if arg.train is True:
         print("User interrupted")
 
 # Visualize the prediction made by the model
-if arg.visualize is True:
+if arg.test is True:
     x, y = generate_patterns(arg.batch_size, arg.max_sequence, arg.min_sequence,
                              arg.in_bits, arg.out_bits, fixed_seq_len=arg.fixed_seq_len)
 
     y_pred = ntm_model(x)
     rt, r_wt, at, w_wt, Mt = ntm_model.debug_ntm()
 
-    plt.matshow(rt, cmap=plt.get_cmap('jet'))
-    plt.matshow(at, cmap=plt.get_cmap('jet'))
-    plt.matshow(w_wt, cmap=plt.get_cmap('gray'))
-    plt.matshow(r_wt, cmap=plt.get_cmap('gray'))
-    plt.matshow(Mt, cmap=plt.get_cmap('jet'))
+    cmap_jet = plt.get_cmap('jet')
+    cmap_gray = plt.get_cmap('gray')
 
-    plt.matshow(x[0], cmap=plt.get_cmap('jet'))
-    plt.matshow(y_pred[0], cmap=plt.get_cmap('jet'))
+    if arg.visualize is True:
+        fig_ntm, (ax_at, ax_wwt, ax_mt, ax_rwt, ax_rt) = plt.subplots(5, 1)
+        fig_ntm.subplots_adjust(top=0.85, bottom=0.15, left=0.05, right=0.95, hspace=0.3)
+
+        ax_at.set_ylabel('Adds')
+        ax_wwt.set_ylabel('Write Weights')
+        ax_mt.set_ylabel("Memory")
+        ax_rwt.set_ylabel("Read Weights")
+        ax_rt.set_ylabel("Reads")
+
+        ax_at.matshow(np.transpose(at), aspect='equal', cmap=cmap_jet)
+        ax_wwt.matshow(w_wt,  aspect='auto', cmap=cmap_gray)
+        ax_mt.matshow(np.transpose(Mt), aspect='auto', cmap=cmap_jet)
+        ax_rwt.matshow(r_wt, aspect='auto', cmap=cmap_gray)
+        ax_rt.matshow(np.transpose(rt), aspect='equal', cmap=cmap_jet)
+
+    fig_ntm_out, (ax_t, ax_p) = plt.subplots(2, 1)
+    fig_ntm_out.subplots_adjust(top=0.85, bottom=0.15, left=0.05, right=0.95, hspace=0.3)
+    t = ax_t.matshow(np.transpose(x[0]), aspect='auto', cmap=cmap_jet)
+    ax_t.set_ylabel("Target")
+    p = ax_p.matshow(np.transpose(y_pred[0]), aspect='auto', cmap=cmap_jet)
+    ax_p.set_ylabel("Prediction")
+
+    fig_ntm_out.suptitle('NTM Copy Task (Sequence Length {})'.format(arg.max_sequence))
+    fig_ntm_out.colorbar(t, ax=(ax_t, ax_p), orientation="vertical", fraction=0.1)
+
     plt.show()

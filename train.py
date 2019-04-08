@@ -46,6 +46,12 @@ parser.add_argument('--memory_vector_size', action="store", dest="memory_vector_
                     help="Number of memory vector size")
 parser.add_argument('--maximum_shifts', action="store", dest="maximum_shifts", default=3, type=int,
                     help="The maximum number of shifts allowed over the memory")
+parser.add_argument('--learn_r_bias', action="store_true", default=False,
+                    help="Learn the read vector initialization")
+parser.add_argument('--learn_w_bias', action="store_true", default=False,
+                    help="Learn the weight vector initialization")
+parser.add_argument('--learn_m_bias', action="store_true", default=False,
+                    help="Learn the memory matrix initialization")
 
 # Copy task sequence generator parameters
 parser.add_argument('--max_sequence', action="store", dest="max_sequence", default=20, type=int,
@@ -70,7 +76,9 @@ parser.add_argument('--train_log_dir', action="store", dest="train_log_dir", def
 arg = parser.parse_args()
 
 # Training
-ntm_model = NTM(arg.controller_size, arg.memory_locations, arg.memory_vector_size, arg.maximum_shifts, arg.out_bits)
+ntm_model = NTM(arg.controller_size, arg.memory_locations, arg.memory_vector_size, arg.maximum_shifts,
+                arg.out_bits, arg.learn_r_bias, arg.learn_w_bias, arg.learn_m_bias)
+
 optimizer = tf.optimizers.RMSprop(learning_rate=arg.learning_rate, momentum=arg.momentum)
 bce_loss = tf.losses.BinaryCrossentropy()
 

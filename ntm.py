@@ -76,7 +76,7 @@ class NTM(Model):
             self.reset_ntm_state(inputs.shape[1])
             self.reset_debug_vars()
 
-        for i in range(inputs.shape[0]):
+        for i in tf.range(inputs.shape[0]):
             # Concatenated input and previous reads [Batch, Features + N]
             controller_inputs = tf.concat([inputs[i], self.r_t_1], axis=1)
             controller_outputs = self.controller(controller_inputs)  # [Batch size, Controller size]
@@ -95,7 +95,7 @@ class NTM(Model):
 
             fc_input = tf.concat([controller_outputs, self.r_t_1], axis=1)  # [Batch size, Controller size + M],
             output_t = self.final_fc(fc_input)  # [Batch size, Output size]
-            outputs.write(i, output_t)  # Write it to an array
+            outputs = outputs.write(i, output_t)  # Write it to an array
 
         outputs = tf.transpose(outputs.stack(), [1, 0, 2])  # [Batch size, Timesteps, Output size]
         return outputs

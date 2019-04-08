@@ -76,8 +76,8 @@ class Addressing(Model):
     def circular_convolution(w, s):
         kernels = tf.TensorArray(dtype=s.dtype, size=s.shape[0])
         
-        for i in range(0, s.shape[0]):
-            kernels = kernels.write(i, tf.roll(w, shift=i-(s.shape[0]//2), axis=0))
+        for i in tf.range(0, s.shape[0]):
+            kernels = kernels.write(i, tf.roll(w, shift=(i-tf.math.floordiv(s.shape[0], 2)), axis=0))
 
         w_circ_conv = tf.transpose(kernels.stack())
         return tf.reduce_sum(w_circ_conv*s, axis=1)
@@ -92,7 +92,7 @@ class Addressing(Model):
     def convolutional_shift(self):
         convolved_weights = tf.TensorArray(dtype=self.w_g_t.dtype, size=self.w_g_t.shape[0])
         
-        for i in range(self.s_t.shape[0]):
+        for i in tf.range(self.s_t.shape[0]):
             cc = self.circular_convolution(self.w_g_t[i], self.s_t[i])
             convolved_weights = convolved_weights.write(i, cc)
         

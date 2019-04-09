@@ -20,8 +20,8 @@ parser.add_argument('--test', action="store_true", default=False,
                     help="Test the NTM with a copy task input sequence")
 parser.add_argument('--visualize', action="store_true", default=False,
                     help="Visualize the working of the NTM on the copy task")
-parser.add_argument('--fixed_seq_len', action="store_true", default=True,
-                    help="Whether a fixed or random sequence length should be used when visualizing")
+parser.add_argument('--random_seq_len', action="store_false", default=True,
+                    help="Whether a fixed or random sequence length should be used when testing")
 parser.add_argument('--epochs', action="store", dest="epochs", default=100, type=int,
                     help="Epochs for training")
 parser.add_argument('--batches', action="store", dest="batch_size", default=2, type=int,
@@ -161,7 +161,7 @@ if arg.train:
 # Visualize the prediction made by the model
 if arg.test or arg.visualize:
     x, y = generate_patterns(arg.batch_size, arg.max_sequence, arg.min_sequence,
-                             arg.in_bits, arg.out_bits, fixed_seq_len=arg.fixed_seq_len)
+                             arg.in_bits, arg.out_bits, fixed_seq_len=arg.random_seq_len)
 
     y_pred = ntm_model(x)
     rt, r_wt, at, w_wt, Mt = ntm_model.debug_ntm()

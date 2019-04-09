@@ -47,6 +47,12 @@ class NTM(Model):
         self.write_weights = []
 
     def debug_ntm(self):  # Function to debug the NTM working
+        # Reversed to correct for the time step order (t_0 at the bottom)
+        self.reads.reverse()
+        self.adds.reverse()
+        self.read_weights.reverse()
+        self.write_weights.reverse()
+
         rt = tf.stack(self.reads)
         at = tf.stack(self.adds)
         r_wt = tf.stack(self.read_weights)

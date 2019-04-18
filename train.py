@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 import tensorflow.keras.backend as K 
 
-from ntm import NTM
+from ntm.ntm import NTM
 from seqgen import generate_patterns
 
 parser = argparse.ArgumentParser(description="Neural Turing Machine")

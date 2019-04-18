@@ -2,6 +2,6 @@
 /.idea/
 /notebooks/
 /ntm_model_backups/
-/__pycache__/
+**/__pycache__/
 !/tf_ntm_ckpt/
 /tf_ntm_logs/
